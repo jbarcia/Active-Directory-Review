@@ -139,8 +139,7 @@ echo:
 	echo Domain Servers
 	echo --------------------------------------------------
 		dsquery server >> "%tempdir%\Domain Info\%Hostname% Domain Servers - 1.txt"
-		dsquery server –o rdn >> "%tempdir%\Domain Info\%Hostname% Domain Servers - 2.txt"
-		nltest /dclist:%userdnsdomain% >> "%tempdir%\Domain Info\%Hostname% Domain Servers - 3.txt"
+		nltest /dclist:%userdnsdomain% >> "%tempdir%\Domain Info\%Hostname% Domain Servers - 2.txt"
 	echo --------------------------------------------------
 	echo Domain Server Roles 
 	echo --------------------------------------------------
@@ -197,7 +196,7 @@ echo:
 			echo 44 = Windows Server 2008 RTM >> "%tempdir%\Domain Info\%Hostname% AD Schema Version.txt"
 			echo 47 = Windows Server 2008 R2 >> "%tempdir%\Domain Info\%Hostname% AD Schema Version.txt"
 			echo 56 = Windows Server 2012 RTM >> "%tempdir%\Domain Info\%Hostname% AD Schema Version.txt"
-
+pause
 
 cls
 color 0A
@@ -263,7 +262,7 @@ echo:
 	echo  Grabbing NTP Settings
 	echo --------------------------------------------------
 		reg query HKLM\SYSTEM\CurrentControlSet\services\W32Time\Parameters\ /v NtpServer >> "%tempdir%\Server Config\%Hostname% NTP Configurations.txt"  
-
+pause
 
 cls
 color 0A
@@ -280,8 +279,7 @@ echo:
 	echo --------------------------------------------------
 		gpresult /z >> "%tempdir%\Domain Policies\%Hostname% GPO Dump.txt"
 REM PowerShell Commands
-		import-module grouppolicy
-		Get-GPOReport -All -Domain %subdomain%.%top-level-domain% -ReportType html -Path "%tempdir%\Domain Policies\%Hostname% AllGPOsReport.html"
+	powershell -Command "&{import-module grouppolicy; Get-GPOReport -All -Domain %subdomain%.%top-level-domain% -ReportType html -Path '%tempdir%\Domain Policies\%Hostname% AllGPOsReport.html';}"
 	echo --------------------------------------------------
 	echo Domain Password Parameters
 	echo --------------------------------------------------
@@ -290,7 +288,7 @@ REM PowerShell Commands
 	echo Audit Policies
 	echo --------------------------------------------------
 		auditpol.exe /get /category:* >> "%tempdir%\Domain Policies\%Hostname% Audit Policies.txt"
-
+pause
 
 cls
 color 0A
@@ -309,8 +307,8 @@ echo:
 	echo --------------------------------------------------
 	echo Inactive user accounts 
 	echo --------------------------------------------------
-		dsquery user domainroot -stalepwd 180 -limit 0 -attr samaccountname name >> "%tempdir%\Domain Users and Groups\%Hostname% Inactive users - 1.txt"
-		dsquery user "dc=%subdomain%,dc=%top-level-domain%" -inactive 13 -limit 0 -attr samaccountname name >> "%tempdir%\Domain Users and Groups\%Hostname% Inactive users - 2.txt"
+		dsquery user domainroot -stalepwd 180 -limit 0 >> "%tempdir%\Domain Users and Groups\%Hostname% Inactive users - 1.txt"
+		dsquery user "dc=%subdomain%,dc=%top-level-domain%" -inactive 13 -limit 0 >> "%tempdir%\Domain Users and Groups\%Hostname% Inactive users - 2.txt"
 	echo --------------------------------------------------
 	echo User accounts with no password required 
 	echo --------------------------------------------------
@@ -326,7 +324,7 @@ echo:
 	echo --------------------------------------------------
 	echo Dump of Disabled Active Directory users
 	echo --------------------------------------------------
-		dsquery user "dc=%subdomain%,dc=%top-level-domain%" -disabled -limit 0 -attr samaccountname name >> "%tempdir%\Domain Users and Groups\%Hostname% Domain Disabled Users.txt"
+		dsquery user "dc=%subdomain%,dc=%top-level-domain%" -disabled -limit 0 >> "%tempdir%\Domain Users and Groups\%Hostname% Domain Disabled Users.txt"
 	echo --------------------------------------------------
 	echo  Grabbing Default Administrator Groups
 	echo --------------------------------------------------
@@ -337,7 +335,7 @@ echo:
 		dsget group "CN=Account Operators,OU=SecurityGroups,dc=%subdomain%,dc=%top-level-domain%" -members | dsget user -samid -fn -mi -ln -display >> "%tempdir%\Domain Users and Groups\%Hostname% Account Operators.txt"
 		dsget group "CN=Backup Operators,OU=SecurityGroups,dc=%subdomain%,dc=%top-level-domain%" -members | dsget user -samid -fn -mi -ln -display >> "%tempdir%\Domain Users and Groups\%Hostname% Backup Operators.txt"
 
-
+echo:
 	echo --------------------------------------------------
 	echo Dump of users and Their Last Password Change
 	echo --------------------------------------------------	 
