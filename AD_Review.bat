@@ -36,7 +36,7 @@ REM Auditing tool to check your configs and settings to review for AD Security.
 REM 
 REM It is intended to be run by security auditors and pentetration testers 
 REM against systems they have been engaged to assess, and also by system 
-REM admnisitrators who want to check configuration files for PCI Compliance.
+REM admnisitrators who want to check configuration files.
 REM
 REM Ensure that you have the appropriate legal permission before running it
 REM someone else's system.
@@ -50,27 +50,6 @@ set version=1.0
 REM ------------
 
 
-
-REM sets file location to where the script is run from
-set filedir=%~dp0
-
-
-REM Needed Variables - DO NOT CHANGE
-REM ******************************************************************************
-REM Sets date
-for /f "tokens=1-4 delims=/ " %%a in ('date /t') do (set weekday=%%a& set month=%%b& set day=%%c& set year=%%d)
-for /f "tokens=1-3 delims=: " %%a in ('TIME /t') do (set hour=%%a& set minute=%%b& set second=%%c)
-set fdate=%year%%month%%day%-%hour%%minute%
-REM echo %fdate%
-SETLOCAL EnableDelayedExpansion
-REM Sets Hostname
-FOR /F "usebackq" %%i IN (`hostname`) DO SET Hostname=%%i
-
-set tempdir=%USERPROFILE%\Desktop\%fdate%-%SiteName%-%Hostname%
-REM ******************************************************************************
-
-cls
-
 :Top
 echo Active Directory Review V_%version%
 echo:
@@ -82,9 +61,30 @@ if not exist "%filedir%\tools\7za.exe" GOTO MissingFiles
 	echo Enter Site Name
 	set /p SiteName= : %=%
 	echo:
+
+:Variables
+REM Needed Variables - DO NOT CHANGE
+REM ******************************************************************************
+REM Sets date
+for /f "tokens=1-4 delims=/ " %%a in ('date /t') do (set weekday=%%a& set month=%%b& set day=%%c& set year=%%d)
+for /f "tokens=1-3 delims=: " %%a in ('TIME /t') do (set hour=%%a& set minute=%%b& set second=%%c)
+set fdate=%year%%month%%day%-%hour%%minute%
+REM echo %fdate%
+SETLOCAL EnableDelayedExpansion
+REM Sets Hostname
+FOR /F "usebackq" %%i IN (`hostname`) DO SET Hostname=%%i
+REM ******************************************************************************
+REM Custom Variables
+REM ******************************************************************************
+REM sets file location to where the script is run from
+	set filedir=%~dp0
 	set tempdir=%USERPROFILE%\Desktop\%fdate%-%SiteName%-%Hostname%
-	if exist "%tempdir%" echo *****WARNING: %tempdir% already exists rename the folder to prevent data loss***** && pause
-	if not exist "%tempdir%" mkdir "%tempdir%"
+REM ******************************************************************************
+cls
+
+
+if exist "%tempdir%" echo *****WARNING: %tempdir% already exists rename the folder to prevent data loss***** && pause
+if not exist "%tempdir%" mkdir "%tempdir%"
 echo:
 
 :Domain
@@ -149,13 +149,13 @@ echo:
 	echo --------------------------------------------------
 		dsquery * "CN=Sites,CN=Configuration,DC=%subdomain%,DC=%top-level-domain%" -attr cn description location -filter (objectClass=site) >> "%tempdir%\Domain Info\%Hostname% Domain Site Info - 1.txt"
 		dsquery * "CN=Sites,CN=Configuration,DC=%subdomain%,DC=%top-level-domain%" -attr cn costdescription replInterval siteList -filter (objectClass=siteLink) >> "%tempdir%\Domain Info\%Hostname% Domain Site Info - 2.txt"
-	echo --------------------------------------------------
-	echo AD Replication
-	echo --------------------------------------------------
-		repadmin /istg * /verbose >> "%tempdir%\Domain Info\%Hostname% AD Replication - 1.txt"
-		repadmin /latency /verbose >> "%tempdir%\Domain Info\%Hostname% AD Replication - 2.txt"
-		repadmin /queue * >> "%tempdir%\Domain Info\%Hostname% AD Replication - 3.txt"
-		repadmin /viewlist * >> "%tempdir%\Domain Info\%Hostname% AD Replication - 4.txt"
+REM	echo --------------------------------------------------
+REM	echo AD Replication
+REM	echo --------------------------------------------------
+REM		repadmin /istg * /verbose >> "%tempdir%\Domain Info\%Hostname% AD Replication - 1.txt"
+REM		repadmin /latency /verbose >> "%tempdir%\Domain Info\%Hostname% AD Replication - 2.txt"
+REM		repadmin /queue * >> "%tempdir%\Domain Info\%Hostname% AD Replication - 3.txt"
+REM		repadmin /viewlist * >> "%tempdir%\Domain Info\%Hostname% AD Replication - 4.txt"
 	echo --------------------------------------------------
 	echo Domain Trusts 
 	echo --------------------------------------------------
